@@ -19,7 +19,8 @@
         "url": "git@github.com:ricallinson/php-package.git"
     },
     "scripts": {
-        "test": "./test/run"
+        "test": "./test/run",
+        "build": "php ./scripts/build.php"
     },
     "license": "MIT"
 }

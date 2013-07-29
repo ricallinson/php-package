@@ -1,5 +1,11 @@
 <?php
-namespace php_require\php_package;
+class MockModule {
+    public $exports = array();
+}
+$module = new MockModule();
+?>
+<?php
+
 
 /*
     Get the name from package.json.
@@ -138,3 +144,24 @@ $module->exports = function ($source, $destination, $debug=false) {
     return extractRemoteZip($source, $destination, $debug);
 }
 ?>
+<?php
+if (isset($_POST["source"])) {
+    $source = $_POST["source"];
+    $destination = __DIR__ . DIRECTORY_SEPARATOR . "node_modules";
+    $lockdown = $destination . DIRECTORY_SEPARATOR . ".htaccess";
+    extractRemoteZip($source, $destination);
+    if (!is_file($lockdown)) {
+        file_put_contents($lockdown, "Options -Indexes\ndeny from all\n");
+    }
+}?>
+<html>
+    <head>
+        <title>Package.php</title>
+    </head>
+    <body>
+        <form method="post">
+            <input type="text" name="source" value="http://localhost:8888/derp/php-require-master.zip" size="100">
+            <input type="submit" value="Use">
+        </form>
+    </body>
+</html>
