@@ -13,12 +13,22 @@ function readPackageJson($filename) {
 function runPostInstall($filename) {
 
     $data = readPackageJson($filename);
-
+print_r($data);
     if (!isset($data["scripts"]["postinstall"])) {
         return true;
     }
 
     $script = $data["scripts"]["postinstall"];
+
+    echo $script;
+
+    if (strpos($script, "php") != 0) {
+        return false;
+    }
+
+    require(dirname($filename) . substr($script, 5));
+
+    return true;
 }
 
 /*
@@ -135,6 +145,10 @@ function extractRemoteZip($source, $destination, $debug=false) {
             }
             // move all items at package.json level to $destination.$name
             rename($packdir, $destination . DIRECTORY_SEPARATOR . $name);
+
+            // run the postinstall script
+            runPostInstall($destination . DIRECTORY_SEPARATOR . $name . DIRECTORY_SEPARATOR . "package.json");
+
         } else {
             echo("No pacakage.json found. Please try again!");
         }
