@@ -20,7 +20,8 @@
     },
     "scripts": {
         "test": "./test/run",
-        "build": "php ./scripts/build.php"
+        "build": "php ./scripts/build.php",
+        "postinstall": "php ./scripts/postinstall.php"
     },
     "license": "MIT"
 }

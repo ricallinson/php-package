@@ -7,17 +7,33 @@ $module = new MockModule();
 <?php
 
 
+function readPackageJson($filename) {
+
+    $json = file_get_contents($filename);
+
+    $data = json_decode($json, true);
+
+    return $data;
+}
+
+function runPostInstall($filename) {
+
+    $data = readPackageJson($filename);
+
+    if (!isset($data["scripts"]["postinstall"])) {
+        return true;
+    }
+
+
+}
+
 /*
     Get the name from package.json.
 */
 
 function readNameFromPackage($filename) {
 
-    // echo $filename . "<br/>";
-
-    $json = file_get_contents($filename);
-
-    $data = json_decode($json, true);
+    $data = readPackageJson($filename);
 
     if (!isset($data["name"])) {
         return "";

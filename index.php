@@ -1,17 +1,33 @@
 <?php
 namespace php_require\php_package;
 
+function readPackageJson($filename) {
+
+    $json = file_get_contents($filename);
+
+    $data = json_decode($json, true);
+
+    return $data;
+}
+
+function runPostInstall($filename) {
+
+    $data = readPackageJson($filename);
+
+    if (!isset($data["scripts"]["postinstall"])) {
+        return true;
+    }
+
+    $script = $data["scripts"]["postinstall"];
+}
+
 /*
     Get the name from package.json.
 */
 
 function readNameFromPackage($filename) {
 
-    // echo $filename . "<br/>";
-
-    $json = file_get_contents($filename);
-
-    $data = json_decode($json, true);
+    $data = readPackageJson($filename);
 
     if (!isset($data["name"])) {
         return "";
