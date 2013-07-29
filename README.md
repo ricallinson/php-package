@@ -1,2 +1,3 @@
-php-package
-===========
+# Php-package
+
+Ideas from a Sunday.

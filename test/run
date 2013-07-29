@@ -1,0 +1,2 @@
+php ./node_modules/.bin/tester
+exit $?
