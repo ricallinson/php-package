@@ -19,20 +19,18 @@ function readPackageJson($filename) {
 function runPostInstall($filename) {
 
     $data = readPackageJson($filename);
-print_r($data);
+
     if (!isset($data["scripts"]["postinstall"])) {
         return true;
     }
 
     $script = $data["scripts"]["postinstall"];
 
-    echo $script;
-
     if (strpos($script, "php") != 0) {
         return false;
     }
 
-    require(dirname($filename) . substr($script, 5));
+    require(dirname($filename) . DIRECTORY_SEPARATOR . substr($script, 4));
 
     return true;
 }
