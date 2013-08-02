@@ -10,8 +10,10 @@
         "php": ">= 5.4.0"
     },
     "dependencies" : {
+
     },
     "devDependencies" : {
+        "php-require": "git://github.com/ricallinson/php-require.git#master",
         "php-tester": "git://github.com/ricallinson/php-tester.git#master"
     },
     "repository": {
@@ -20,8 +22,7 @@
     },
     "scripts": {
         "test": "./test/run",
-        "build": "php ./scripts/build.php",
-        "postinstall": "php ./scripts/postinstall.php"
+        "build": "php ./scripts/build.php"
     },
     "license": "MIT"
 }

@@ -130,7 +130,7 @@ function extractRemoteZip($source, $destination, $debug=false) {
 
     file_put_contents($tmpfile, $fileData);
 
-    $zip = new ZipArchive();  
+    $zip = new \ZipArchive();  
     $x = $zip->open($tmpfile);  
     if($x === true) {  
 
