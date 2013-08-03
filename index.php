@@ -7,6 +7,10 @@ namespace php_require\php_package;
 
 function readPackageJson($filename) {
 
+    if (!is_file($filename)) {
+        return array();
+    }
+
     $json = file_get_contents($filename);
 
     $data = json_decode($json, true);
@@ -20,18 +24,27 @@ function readPackageJson($filename) {
 
 function runPostInstall($filename) {
 
+    // read the filename as a package.json file.
     $data = readPackageJson($filename);
 
+    // if there are no items in the array return false.
+    if (count($data) === 0) {
+        return false;
+    }
+
+    // If there is no post install script return true.
     if (!isset($data["scripts"]["postinstall"])) {
         return true;
     }
 
     $script = $data["scripts"]["postinstall"];
 
+    // if the script does not start with "php" return false.
     if (strpos($script, "php") != 0) {
         return false;
     }
 
+    // require the script removing "php" from the start.
     require(dirname($filename) . DIRECTORY_SEPARATOR . substr($script, 4));
 
     return true;
@@ -43,6 +56,7 @@ function runPostInstall($filename) {
 
 function readNameFromPackage($filename) {
 
+    // read the filename as a package.json file.
     $data = readPackageJson($filename);
 
     if (!isset($data["name"])) {
@@ -125,49 +139,58 @@ function extractRemoteZip($source, $destination, $debug=false) {
 
     curl_setopt($client, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($client, CURLOPT_FOLLOWLOCATION, true);
+    curl_setopt($client, CURLOPT_CONNECTTIMEOUT_MS, 5000);
 
     $fileData = curl_exec($client);
 
     file_put_contents($tmpfile, $fileData);
 
     $zip = new \ZipArchive();  
-    $x = $zip->open($tmpfile);  
-    if($x === true) {  
+    $x = $zip->open($tmpfile);
 
-        // extract to tmp destination
-        $zip->extractTo($tmpdir);
-        $zip->close();
-
-        // read package.json and get $name
-        $packdir = findPackageDir($tmpdir);
-        $name = readNameFromPackage($packdir . DIRECTORY_SEPARATOR . "package.json");
-
-        // if we got a $name move everything
-        if ($name) {
-            // make sure we have the $destination
-            if (!is_dir($destination)) {
-                // TODO: Check this is safe.
-                mkdir($destination, 0755, true);
-            }
-            // move all items at package.json level to $destination.$name
-            rename($packdir, $destination . DIRECTORY_SEPARATOR . $name);
-
-            // run the postinstall script
-            runPostInstall($destination . DIRECTORY_SEPARATOR . $name . DIRECTORY_SEPARATOR . "package.json");
-
-        } else {
-            echo("No pacakage.json found. Please try again!");
-        }
-
-        deleteDir($tmpdir);
-        unlink($tmpfile);
-
-    } else {
+    if($x !== true) {  
         if($debug !== true) {
             unlink($tmpfile);
         }
-        echo("There was a problem. Please try again!");
+        return array("error" => "There was a problem. Please try again!");
     }
+
+    $return = array();
+
+    // extract to tmp destination.
+    $zip->extractTo($tmpdir);
+    $zip->close();
+
+    // read package.json and get $name.
+    $packdir = findPackageDir($tmpdir);
+    $name = readNameFromPackage($packdir . DIRECTORY_SEPARATOR . "package.json");
+
+    // if we got a $name move everything.
+    if ($name) {
+        // make sure we have the $destination.
+        if (!is_dir($destination)) {
+            // TODO: Check this is safe.
+            mkdir($destination, 0755, true);
+        }
+        if (is_dir($destination . DIRECTORY_SEPARATOR . $name)) {
+            $return["error"] = "Cannot install package as it's already installed!";
+        } else {
+            // move all items at package.json level to $destination.$name
+            rename($packdir, $destination . DIRECTORY_SEPARATOR . $name);
+            // run the postinstall script
+            runPostInstall($destination . DIRECTORY_SEPARATOR . $name . DIRECTORY_SEPARATOR . "package.json");
+            // return the output directory.
+            $return["output"] = $destination . DIRECTORY_SEPARATOR . $name;
+        }
+    } else {
+        // return an error if the package was not found.
+        $return["error"] = "No pacakage.json found. Please try again!";
+    }
+
+    deleteDir($tmpdir);
+    unlink($tmpfile);
+
+    return $return;
 }
 
 $module->exports = function ($source, $destination, $debug=false) {
