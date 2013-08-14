@@ -124,6 +124,30 @@ describe("php-package", function () {
         });
     });
 
+    describe("extractRemoteZipFromUrl()", function () {
+
+        it("should return [foo]", function () {
+            $source = "file://" . __DIR__ . "/fixtures/foo.zip";
+            $destination = __DIR__ . "/fixtures/site";
+            $status = php_require\php_package\extractRemoteZipFromUrl($source, $destination, true);
+            assert(isset($status["package"]) && $status["package"] === "foo");
+            // clean up
+            php_require\php_package\deleteDir($destination);
+        });
+    });
+
+    describe("extractRemoteZipFromFile()", function () {
+
+        it("should return [foo]", function () {
+            $source = __DIR__ . "/fixtures/foo.zip";
+            $destination = __DIR__ . "/fixtures/site";
+            $status = php_require\php_package\extractRemoteZipFromFile($source, $destination, true);
+            assert(isset($status["package"]) && $status["package"] === "foo");
+            // clean up
+            php_require\php_package\deleteDir($destination);
+        });
+    });
+
     describe("extractRemoteZip()", function () {
 
         it("should return [foo]", function () {
