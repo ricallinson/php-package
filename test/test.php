@@ -14,7 +14,102 @@ require(__DIR__ . "/../index.php");
 
 describe("php-package", function () {
 
-    describe("todo", function () {
-        assert(false);
+    describe("readPackageJson()", function () {
+            
+        it("should return [0]", function () {
+            $filepath = __DIR__ . "/fixtures/false/package.json";
+            $json = php_require\php_package\readPackageJson($filepath);
+            assert(count($json) === 0);
+        });
+
+        it("should return [foo]", function () {
+            $filepath = __DIR__ . "/fixtures/foo/package.json";
+            $json = php_require\php_package\readPackageJson($filepath);
+            assert($json["name"] === "foo");
+        });
+    });
+
+    describe("runPostInstall()", function () {
+
+        it("should return [false]", function () {
+            $filepath = __DIR__ . "/fixtures/false/package.json";
+            $result = php_require\php_package\runPostInstall($filepath);
+            assert($result === false);
+        });
+
+        it("should return [true] from no post install", function () {
+            $filepath = __DIR__ . "/fixtures/foo/package.json";
+            $result = php_require\php_package\runPostInstall($filepath);
+            assert($result === true);
+        });
+
+        it("should return [false] from a post install that is not php", function () {
+            $filepath = __DIR__ . "/fixtures/baz/package.json";
+            $result = php_require\php_package\runPostInstall($filepath);
+            assert($result === false);
+        });
+
+        it("should return [true] from a post install", function () {
+            $filepath = __DIR__ . "/fixtures/bar/package.json";
+            ob_start();
+            php_require\php_package\runPostInstall($filepath);
+            $result = ob_get_clean();
+            assert($result === "POST INSTALL");
+        });
+    });
+
+    describe("readNameFromPackage()", function () {
+
+        it("should return an [empty string]", function () {
+            $filepath = __DIR__ . "/fixtures/false/package.json";
+            $name = php_require\php_package\readNameFromPackage($filepath);
+            assert($name === "");
+        });
+
+        it("should return [foo]", function () {
+            $filepath = __DIR__ . "/fixtures/foo/package.json";
+            $name = php_require\php_package\readNameFromPackage($filepath);
+            assert($name === "foo");
+        });
+    });
+
+    describe("findPackageDir()", function () {
+
+        it("should return an [empty string]", function () {
+            $dir = __DIR__ . "/fixtures/false";
+            $filepath = php_require\php_package\findPackageDir($dir);
+            assert($filepath === "");
+        });
+
+        it("should return [/fixtures/bar]", function () {
+            $dir = __DIR__ . "/fixtures";
+            $filepath = php_require\php_package\findPackageDir($dir);
+            assert(strpos($filepath, "/fixtures/bar") !== false);
+        });
+
+        it("should return [/fixtures/bar]", function () {
+            $dir = __DIR__ . "/fixtures/foo";
+            $filepath = php_require\php_package\findPackageDir($dir);
+            assert(strpos($filepath, "/fixtures/foo") !== false);
+        });
+
+        it("should return an [empty string] from /fixtures/site", function () {
+            $dir = __DIR__ . "/fixtures/site";
+            $filepath = php_require\php_package\findPackageDir($dir);
+            assert($filepath === "");
+        });
+    });
+
+    describe("deleteDir()", function () {
+
+        it("should return [false]", function () {
+            $deldir = __DIR__ . "/fixtures/delete";
+            $mkdir = $deldir . "/folder/deep";
+            mkdir($mkdir, 0755, true);
+            file_put_contents($mkdir . "/test.text", "test file");
+            file_put_contents(dirname($mkdir) . "/test.text", "test file");
+            php_require\php_package\deleteDir($deldir);
+            assert(is_dir($deldir) === false);
+        });
     });
 });

@@ -1,0 +1,12 @@
+{
+    "name": "foo",
+    "description": "Testing package bar.",
+    "version": "0.1.0",
+    "config": {
+        "hoobr": {
+            "version": "*",
+            "type": "library",
+            "core": "false"
+        }
+    }
+}

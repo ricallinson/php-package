@@ -67,10 +67,14 @@ function readNameFromPackage($filename) {
 }
 
 /*
-    Recursively find a package.json file in the given directory.
+    Recursively find the __first__ package.json file in the given directory.
 */
 
 function findPackageDir($dirpath) {
+
+    if (!is_dir($dirpath)) {
+        return "";
+    }
 
     $cdir = scandir($dirpath);
 
@@ -101,7 +105,7 @@ function findPackageDir($dirpath) {
 function deleteDir($dirpath) {
 
     if (!is_dir($dirpath)) {
-        throw new InvalidArgumentException("$dirpath must be a directory");
+        throw new InvalidArgumentException($dirpath . " must be a directory");
     }
 
     if (substr($dirpath, strlen($dirpath) - 1, 1) != DIRECTORY_SEPARATOR) {
@@ -180,7 +184,8 @@ function extractRemoteZip($source, $destination, $debug=false) {
             // run the postinstall script
             runPostInstall($destination . DIRECTORY_SEPARATOR . $name . DIRECTORY_SEPARATOR . "package.json");
             // return the output directory.
-            $return["output"] = $destination . DIRECTORY_SEPARATOR . $name;
+            $return["dir"] = $destination . DIRECTORY_SEPARATOR . $name;
+            $return["package"] = $name;
         }
     } else {
         // return an error if the package was not found.

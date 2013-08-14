@@ -1,0 +1,15 @@
+{
+    "name": "baz",
+    "description": "Testing package baz.",
+    "version": "0.1.0",
+    "config": {
+        "hoobr": {
+            "version": "*",
+            "type": "library",
+            "core": "false"
+        }
+    },
+    "scripts": {
+        "postinstall": "./scripts/post-install.php"
+    }
+}

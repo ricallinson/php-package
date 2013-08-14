@@ -1,0 +1,15 @@
+{
+    "name": "bar",
+    "description": "Testing package bar.",
+    "version": "0.1.0",
+    "config": {
+        "hoobr": {
+            "version": "*",
+            "type": "library",
+            "core": "false"
+        }
+    },
+    "scripts": {
+        "postinstall": "php ./scripts/post-install.php"
+    }
+}
