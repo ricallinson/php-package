@@ -1,1 +1,0 @@
-Test directory for installing zip module into.

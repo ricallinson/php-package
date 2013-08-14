@@ -131,6 +131,39 @@ describe("php-package", function () {
             $destination = __DIR__ . "/fixtures/site";
             $status = php_require\php_package\extractZip($source, $destination, true);
             assert(isset($status["package"]) && $status["package"] === "foo");
+            // clean up
+            php_require\php_package\deleteDir($destination);
+        });
+
+        it("should return [404]", function () {
+            $source = __DIR__ . "/fixtures/bar.zip";
+            $destination = __DIR__ . "/fixtures/site";
+            $status = php_require\php_package\extractZip($source, $destination);
+            assert(isset($status["code"]) && $status["code"] === 404);
+        });
+
+        it("should return [400]", function () {
+            $source = __DIR__ . "/fixtures/bad.zip";
+            $destination = __DIR__ . "/fixtures/site";
+            $status = php_require\php_package\extractZip($source, $destination, true);
+            assert(isset($status["code"]) && $status["code"] === 400);
+        });
+
+        it("should return [409]", function () {
+            $source = __DIR__ . "/fixtures/foo.zip";
+            $destination = __DIR__ . "/fixtures/site";
+            $status = php_require\php_package\extractZip($source, $destination, true);
+            $status = php_require\php_package\extractZip($source, $destination, true);
+            assert(isset($status["code"]) && $status["code"] === 409);
+            // clean up
+            php_require\php_package\deleteDir($destination);
+        });
+
+        it("should return [422]", function () {
+            $source = __DIR__ . "/fixtures/empty.zip";
+            $destination = __DIR__ . "/fixtures/site";
+            $status = php_require\php_package\extractZip($source, $destination, true);
+            assert(isset($status["code"]) && $status["code"] === 422);
         });
     });
 });

@@ -170,6 +170,7 @@ function extractRemoteZipFromFile($source, $destination, $debug=false) {
 function extractZip($zipfile, $destination, $debug=false) { 
 
     $tmpdir = "/tmp/" . md5($zipfile);
+    $return = array();
     // $tmpfile = $tmpdir . '.zip';
     // $client = curl_init($source);
 
@@ -181,6 +182,12 @@ function extractZip($zipfile, $destination, $debug=false) {
 
     // file_put_contents($tmpfile, $fileData);
 
+    if (!is_file($zipfile)) {
+        $return["error"] = "Not Found, please try again.";
+        $return["code"] = 404;
+        return $return;
+    }
+
     $zip = new \ZipArchive();  
     $x = $zip->open($zipfile);
 
@@ -188,14 +195,18 @@ function extractZip($zipfile, $destination, $debug=false) {
         if($debug !== true) {
             unlink($zipfile);
         }
-        return array("error" => "There was a problem. Please try again!");
+        $return["error"] = "Bad Request, the zip file could ot be opened.";
+        $return["code"] = 400;
+        return $return;
     }
-
-    $return = array();
 
     // extract to tmp destination.
     $zip->extractTo($tmpdir);
     $zip->close();
+
+    if($debug !== true) {
+        unlink($zipfile);
+    }
 
     // read package.json and get $name.
     $packdir = findPackageDir($tmpdir);
@@ -209,7 +220,8 @@ function extractZip($zipfile, $destination, $debug=false) {
             mkdir($destination, 0755, true);
         }
         if (is_dir($destination . DIRECTORY_SEPARATOR . $name)) {
-            $return["error"] = "Cannot install package as it's already installed!";
+            $return["error"] = "Conflict, package as it's already installed.";
+            $return["code"] = 409;
         } else {
             // move all items at package.json level to $destination.$name
             rename($packdir, $destination . DIRECTORY_SEPARATOR . $name);
@@ -221,12 +233,12 @@ function extractZip($zipfile, $destination, $debug=false) {
         }
     } else {
         // return an error if the package was not found.
-        $return["error"] = "No pacakage.json found. Please try again!";
+        $return["error"] = "Unprocessable Entity, no pacakage.json found.";
+        $return["code"] = 422;
     }
 
     if($debug !== true) {
         deleteDir($tmpdir);
-        unlink($zipfile);
     }
 
     return $return;
