@@ -105,7 +105,7 @@ function findPackageDir($dirpath) {
 function deleteDir($dirpath) {
 
     if (!is_dir($dirpath)) {
-        throw new InvalidArgumentException($dirpath . " must be a directory");
+        throw new \Exception($dirpath . " must be a directory");
     }
 
     if (substr($dirpath, strlen($dirpath) - 1, 1) != DIRECTORY_SEPARATOR) {
@@ -135,10 +135,10 @@ function deleteDir($dirpath) {
     Get the zip file found at $source and unpack it into $destination.
 */
 
-function extractRemoteZip($source, $destination, $debug=false) { 
+function extractRemoteZipFromUrl($source, $destination, $debug=false) { 
 
-    $tmpdir = "/tmp/" . md5($source);
-    $tmpfile = $tmpdir . '.zip';
+    $zipfile = "/tmp/" . md5($source) . '.zip';
+
     $client = curl_init($source);
 
     curl_setopt($client, CURLOPT_RETURNTRANSFER, 1);
@@ -147,14 +147,46 @@ function extractRemoteZip($source, $destination, $debug=false) {
 
     $fileData = curl_exec($client);
 
-    file_put_contents($tmpfile, $fileData);
+    file_put_contents($zipfile, $fileData);
+
+    return extractZip($zipfile, $destination, $debug);
+}
+
+function extractRemoteZipFromFile($source, $destination, $debug=false) { 
+
+    $zipfile = "/tmp/" . md5($source) . '.zip';
+
+    $fileData = file_get_contents($source);
+
+    file_put_contents($zipfile, $fileData);
+
+    return extractZip($zipfile, $destination, $debug);
+}
+
+/*
+    Get the zip file found at $source and unpack it into $destination.
+*/
+
+function extractZip($zipfile, $destination, $debug=false) { 
+
+    $tmpdir = "/tmp/" . md5($zipfile);
+    // $tmpfile = $tmpdir . '.zip';
+    // $client = curl_init($source);
+
+    // curl_setopt($client, CURLOPT_RETURNTRANSFER, 1);
+    // curl_setopt($client, CURLOPT_FOLLOWLOCATION, true);
+    // curl_setopt($client, CURLOPT_CONNECTTIMEOUT_MS, 5000);
+
+    // $fileData = curl_exec($client);
+
+    // file_put_contents($tmpfile, $fileData);
 
     $zip = new \ZipArchive();  
-    $x = $zip->open($tmpfile);
+    $x = $zip->open($zipfile);
 
     if($x !== true) {  
         if($debug !== true) {
-            unlink($tmpfile);
+            unlink($zipfile);
         }
         return array("error" => "There was a problem. Please try again!");
     }
@@ -192,13 +224,15 @@ function extractRemoteZip($source, $destination, $debug=false) {
         $return["error"] = "No pacakage.json found. Please try again!";
     }
 
-    deleteDir($tmpdir);
-    unlink($tmpfile);
+    if($debug !== true) {
+        deleteDir($tmpdir);
+        unlink($zipfile);
+    }
 
     return $return;
 }
 
-$module->exports = function ($source, $destination, $debug=false) {
-    return extractRemoteZip($source, $destination, $debug);
+$module->exports = function ($sourceUrl, $destination, $debug=false) {
+    return extractRemoteZipFromUrl($sourceUrl, $destination, $debug);
 }
 ?>

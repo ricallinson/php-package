@@ -102,6 +102,17 @@ describe("php-package", function () {
 
     describe("deleteDir()", function () {
 
+        it("should return [true]", function () {
+            $deldir = __DIR__ . "/fixtures/no-dir";
+            $status = false;
+            try {
+                php_require\php_package\deleteDir($deldir);
+            } catch (Exception $err) {
+                $status = true;
+            }
+            assert($status);
+        });
+
         it("should return [false]", function () {
             $deldir = __DIR__ . "/fixtures/delete";
             $mkdir = $deldir . "/folder/deep";
@@ -110,6 +121,16 @@ describe("php-package", function () {
             file_put_contents(dirname($mkdir) . "/test.text", "test file");
             php_require\php_package\deleteDir($deldir);
             assert(is_dir($deldir) === false);
+        });
+    });
+
+    describe("extractRemoteZip()", function () {
+
+        it("should return [foo]", function () {
+            $source = __DIR__ . "/fixtures/foo.zip";
+            $destination = __DIR__ . "/fixtures/site";
+            $status = php_require\php_package\extractZip($source, $destination, true);
+            assert(isset($status["package"]) && $status["package"] === "foo");
         });
     });
 });
